@@ -2,14 +2,18 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://www.skyscanner.net/g/conductor/v1/fps3/search/13ce02c7-3f37-40a0-9d3f-e7298304686e?geo_schema=skyscanner&carrier_schema=skyscanner&response_include=query%3Bdeeplink%3Bsegment%3Bstats%3Bfqs%3Bpqs&_=1568829470062")
+                .url("https://www.skyscanner.net/g/conductor/v1/fps3/search/e8547de7-8513-4764-801c-0518edf8ffee?geo_schema=skyscanner&carrier_schema=skyscanner&response_include=query%3Bdeeplink%3Bsegment%3Bstats%3Bfqs%3Bpqs&_=1568846015017")
                 .get()
                 .addHeader("Content-Type", "application/json")
                 .addHeader("charset", "utf-8")
@@ -22,16 +26,33 @@ public class Main {
                 .addHeader("X-Skyscanner-ChannelId", "website")
                 .addHeader("X-Skyscanner-DeviceDetection-IsMobile", "false")
                 .addHeader("X-Skyscanner-Traveller-Context", "d0154516-b2d9-4dbb-9249-75cfee7dc0ec")
-                .addHeader("X-Skyscanner-ViewId", "af0787ff-ff2c-4463-8fd5-063bcaf9f22c")
+                .addHeader("X-Skyscanner-ViewId", "cd72f8f3-ab09-4d2c-aa4c-b7334a2448bf")
                 .addHeader("X-Requested-With", "XMLHttpRequest")
-                .addHeader("X-Gateway-ServedBy", "gw51.skyscanner.net")
+                .addHeader("X-Gateway-ServedBy", "gw53.skyscanner.net")
                 .addHeader("X-Skyscanner-If-None-Match", "96bf52fe-f9d1-4205-bad8-14a14dbbd684")
                 .addHeader("X-Skyscanner-MixPanelId", "[object Response]")
                 .addHeader("Cache-Control", "no-cache")
-                .addHeader("Postman-Token", "cbad0f19-69c8-42e0-95c1-571b0f3f24e8")
                 .build();
 
         Response response = client.newCall(request).execute();
-        System.out.println(response.body().string());
+        String resBody = response.body().string();
+        System.out.println(resBody);
+
+        JSONObject jBody = new JSONObject(resBody);
+        JSONArray itineraries = jBody.getJSONArray("itineraries");
+        System.out.println(itineraries);
+        int index = 0;
+        for (int i = 0; i < itineraries.length(); i++) {
+            JSONObject object = itineraries.getJSONObject(i);
+            System.out.println(object);
+            JSONArray pricingOptions = object.getJSONArray("pricing_options");
+            for (int j = 0; j < pricingOptions.length(); j++) {
+                JSONObject price = pricingOptions.getJSONObject(j).getJSONObject("price");
+                if (price.has("amount"))
+                    System.out.println( index + " price: " + price.getFloat("amount"));
+                index++;
+            }
+        }
+
     }
 }
